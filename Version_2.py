@@ -1,3 +1,4 @@
+import math
 import tkinter as tk
 from tkinter import messagebox
 
@@ -18,7 +19,23 @@ def operate(op):
 # Calculate the result
 def calculate():
     try:
-        result = eval(entry.get())
+        expression = entry.get()
+        if "√" in expression:
+            number = float(expression[1:])  # Get the number after √
+            result = math.sqrt(number)
+        
+        elif "%" in expression:
+            number = float(expression[:-1])  # Get the number before %
+            result = number / 100
+        
+        elif "^" in expression:
+            number1 = float(expression[:expression.index("^")]) # Get the number before ^
+            number2 = float(expression[expression.index("^") + 1:]) # Get the number after ^
+            result = number1 ** number2
+        
+        else:
+            result = eval(expression)
+        
         entry.delete(0, tk.END)
         entry.insert(0, result)
     except ZeroDivisionError:
@@ -28,9 +45,40 @@ def calculate():
         messagebox.showerror("Error", "Invalid input!")
         entry.delete(0, tk.END)
 
+
 # Clear the entry box
 def clear():
     entry.delete(0, tk.END)
+
+# Function for square root
+def square_root():
+    try:
+        number = float(entry.get())
+        if number < 0:
+            messagebox.showerror("Error", "Cannot calculate the square root of a negative number!")
+        else:
+            entry.delete(0, tk.END)
+            entry.insert(0, math.sqrt(number))
+    except ValueError:
+        messagebox.showerror("Error", "Please enter a valid number!")
+
+# Function for percentage
+def percentage():
+    try:
+        number = float(entry.get())
+        entry.delete(0, tk.END)
+        entry.insert(0, number / 100)
+    except ValueError:
+        messagebox.showerror("Error", "Please enter a valid number!")
+
+# Function for power (x^y)
+def power():
+    current = entry.get()
+    if current == "":
+        messagebox.showerror("Error", "Please enter a number first!")
+    else:
+        entry.insert(tk.END, "**")  # '**' is used for power in Python
+
 
 # Main window
 root = tk.Tk()
@@ -59,8 +107,11 @@ operations = [("+", 1, 3), ("-", 2, 3), ("*", 3, 3), ("/", 4, 3)]
 for (symbol, row, col) in operations:
     tk.Button(root, text=symbol, width=10, command=lambda s=symbol: operate(s)).grid(row=row, column=col)
 
-# Equal button
-tk.Button(root, text="=", width=10, command=calculate).grid(row=5, column=0, columnspan=4)
+# Special operation buttons
+tk.Button(root, text="√", width=10, command=square_root).grid(row=5, column=0)  # Square root
+tk.Button(root, text="%", width=10, command=percentage).grid(row=5, column=1)  # Percentage
+tk.Button(root, text="^", width=10, command=power).grid(row=5, column=2)  # Power
+tk.Button(root, text="=", width=10, command=calculate).grid(row=5, column=3)  # Equals
 
 # Run the application
 root.mainloop()
